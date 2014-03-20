@@ -61,7 +61,7 @@
 <em class="property">class </em><tt class="descclassname">rocon_app_utilities.</tt><tt class="descname">RappIndexer</tt><big>(</big><em>raw_data=None</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="rocon_app_utilities.RappIndexer.get_compatible_rapps">
-<tt class="descname">get_compatible_rapps</tt><big>(</big><em>uri=&lt;rocon_uri.uri.RoconURI object at 0x3411090&gt;</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.get_compatible_rapps" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_compatible_rapps</tt><big>(</big><em>uri=&lt;rocon_uri.uri.RoconURI object at 0x3fe4090&gt;</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.get_compatible_rapps" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns all rapps which are compatible with given URI</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -127,8 +127,20 @@
 
 <dl class="method">
 <dt id="rocon_app_utilities.RappIndexer.update_index">
-<tt class="descname">update_index</tt><big>(</big><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.update_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crawls rocon apps from ROS_PACKAGE_PATH and generates raw_data dictionary</p>
+<tt class="descname">update_index</tt><big>(</big><em>package_whitelist=None</em>, <em>package_blacklist=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.update_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crawls rocon apps from ROS_PACKAGE_PATH and generates raw_data dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>package_whitelist</strong> (<em>[str]</em>) &#8211; list of target package list</li>
+<li><strong>package_blacklist</strong> (<em>[str]</em>) &#8211; list of blacklisted package</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
