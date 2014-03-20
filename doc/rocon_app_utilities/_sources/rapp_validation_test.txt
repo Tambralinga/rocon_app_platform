@@ -1,0 +1,67 @@
+Rapp Validataion Test Cases
+===========================
+
+
+Valid Rapps
+-----------
+
+Implementation Child
+^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+    compatibility: rocon://
+    launch: rocon_test_apps_basic/talker.launch
+    icon: rocon_apps/rocon_bubble.png
+    parent_name: rocon_test_apps_basic/parent_talker.rapp
+
+Implementation Ancestor
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+    display: Talker
+    description: 'Talk Talk'
+    compatibility: rocon://
+    launch: rocon_test_apps_basic/talker.launch
+    icon: rocon_apps/rocon_bubble.png
+    public_interface: rocon_apps/talker.interface
+    public_parameters: rocon_apps/talker.parameters
+
+Virtual Ancestor
+^^^^^^^^^^^^^^^^
+
+.. code-block:: yaml
+
+    display: Talker
+    description: 'Talk Talk'
+    icon: rocon_apps/rocon_bubble.png
+    public_interface: rocon_apps/talker.interface
+    public_parameters: rocon_apps/talker.parameters
+
+
+Invalid Rapps
+-------------
+
+*Publics(interface and parameters) with Parent name*
+
+.. code-block:: yaml
+
+    display: Talker
+    description: 'Talk Talk'
+    icon: rocon_apps/rocon_bubble.png
+    launch: rocon_test_apps_basic/talker.launch
+    public_interface: rocon_apps/talker.interface
+    public_parameters: rocon_apps/talker.parameters
+    parent_name: rocon_test_apps_basic/parent_talker.rapp
+
+*Publics and compatibility but launch*
+
+.. code-block:: yaml
+
+    display: Talker
+    description: 'Talk Talk'
+    compatibility: rocon://
+    icon: rocon_apps/rocon_bubble.png
+    public_interface: rocon_apps/talker.interface
+    public_parameters: rocon_apps/talker.parameters

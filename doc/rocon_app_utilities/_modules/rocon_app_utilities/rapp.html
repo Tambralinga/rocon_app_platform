@@ -1,0 +1,381 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rocon_app_utilities.rapp &mdash; rocon_app_utilities 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="rocon_app_utilities 0.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="rocon_app_utilities" href="../rocon_app_utilities.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../rocon_app_utilities.html" accesskey="U">rocon_app_utilities</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for rocon_app_utilities.rapp</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c">#</span>
+<span class="c"># License: BSD</span>
+<span class="c">#   https://raw.github.com/robotics-in-concert/rocon_app_platform/license/LICENSE</span>
+<span class="c">#</span>
+<span class="c">#################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span> 
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">rocon_uri</span>
+
+<span class="c">#################################################################################</span>
+<span class="c"># Local Method</span>
+<span class="c">#################################################################################</span>
+
+<span class="k">def</span> <span class="nf">_is_implementation_rapp</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      It is implementation if it contains compatibility and launch attributes</span>
+
+<span class="sd">      :param data: dict of rapp definition</span>
+<span class="sd">      :type data: dict</span>
+
+<span class="sd">      :returns: whether it is implementation or not</span>
+<span class="sd">      :rtype: bool </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">IMPLEMETATION_VALIDATION_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;launch&#39;</span><span class="p">,</span> <span class="s">&#39;compatibility&#39;</span><span class="p">]</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">IMPLEMETATION_VALIDATION_LIST</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_is_ancestor_rapp</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      It is ancestor rapp if it does not have parent_name attribute</span>
+
+<span class="sd">      :param data: dict of rapp definition</span>
+<span class="sd">      :type data: dict</span>
+
+<span class="sd">      :returns: whether it is ancestor or not</span>
+<span class="sd">      :rtype: bool </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">CHILD_VALIDATION_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;parent_name&#39;</span><span class="p">]</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">CHILD_VALIDATION_LIST</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="n">r</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="load_yaml_from_file"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.load_yaml_from_file">[docs]</a><span class="k">def</span> <span class="nf">load_yaml_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      Load rapp specs yaml from the given file</span>
+
+<span class="sd">      :param filename: absolute path to the rapp definition</span>
+<span class="sd">      :type filename: str</span>
+
+<span class="sd">      :returns: dict of loaded rapp</span>
+<span class="sd">      :rtype: dict</span>
+
+<span class="sd">      :raises: InvalidRappFieldException: Rapp includes invalid filed</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">RAPP_ATTRIBUTES</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;display&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;icon&#39;</span><span class="p">,</span> <span class="s">&#39;public_interface&#39;</span><span class="p">,</span> <span class="s">&#39;public_parameters&#39;</span><span class="p">,</span> <span class="s">&#39;compatibility&#39;</span><span class="p">,</span> <span class="s">&#39;launch&#39;</span><span class="p">,</span> <span class="s">&#39;parent_name&#39;</span><span class="p">,</span> <span class="s">&#39;pairing_clients&#39;</span><span class="p">,</span> <span class="s">&#39;required_capability&#39;</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">app_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">app_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">RAPP_ATTRIBUTES</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidRappException</span><span class="p">(</span><span class="s">&#39;Invalid Field : [&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;] Valid Fields : [&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">RAPP_ATTRIBUTES</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;]&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">app_data</span>
+
+</div>
+<div class="viewcode-block" id="classify_rapp_type"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.classify_rapp_type">[docs]</a><span class="k">def</span> <span class="nf">classify_rapp_type</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      Classify the current rapp among VirtualAncestor, ImplementationAnacestor, ImplementationChild </span>
+
+<span class="sd">      :param data: rapp yaml data</span>
+<span class="sd">      :type data: dict</span>
+
+<span class="sd">      :returns: its classification is implementation? is ancestor? and its type</span>
+<span class="sd">      :rtypes: bool, bool, str</span>
+
+<span class="sd">      :raises: InvalidRappException: It is virtual child rapp</span>
+<span class="sd">      :raises: InvalidRappFieldException: Rapp contains invalid field</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">is_impl</span> <span class="o">=</span> <span class="n">_is_implementation_rapp</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">is_ance</span> <span class="o">=</span> <span class="n">_is_ancestor_rapp</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">impl</span> <span class="o">=</span> <span class="s">&#39;Implementation&#39;</span> <span class="k">if</span> <span class="n">is_impl</span> <span class="k">else</span> <span class="s">&#39;Virtual&#39;</span>
+    <span class="n">ance</span> <span class="o">=</span> <span class="s">&#39;Ancestor&#39;</span> <span class="k">if</span> <span class="n">is_ance</span> <span class="k">else</span> <span class="s">&#39;Child&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_impl</span> <span class="ow">and</span> <span class="n">is_ance</span><span class="p">:</span> <span class="c"># Implementation Ancestor</span>
+            <span class="n">ImplementationAncestorRapp</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">is_impl</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_ance</span><span class="p">:</span> <span class="c"># Implementation Child</span>
+            <span class="n">ImplementationChildRapp</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">is_impl</span> <span class="ow">and</span> <span class="n">is_ance</span><span class="p">:</span> <span class="c"># Virtual Ancestor</span>
+            <span class="n">VirtualAncestorRapp</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>                         <span class="c"># Virtual Child</span>
+            <span class="k">raise</span> <span class="n">InvalidRappException</span><span class="p">(</span><span class="s">&#39;Virtual Child rapp. Invalid!&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">InvalidRappFieldException</span> <span class="k">as</span> <span class="n">ife</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ife</span>
+        
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">impl</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">ance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">is_impl</span><span class="p">,</span> <span class="n">is_ance</span><span class="p">,</span> <span class="n">t</span> 
+
+</div>
+<div class="viewcode-block" id="validate_rapp_field"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.validate_rapp_field">[docs]</a><span class="k">def</span> <span class="nf">validate_rapp_field</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Validate each field. E.g) check rocon uri. Check the linked file exist </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c">#  TODO</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="Rapp"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp">[docs]</a><span class="k">class</span> <span class="nc">Rapp</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Rocon(or Robot) App definition. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;type&#39;</span><span class="p">,</span> <span class="s">&#39;is_impl&#39;</span><span class="p">,</span> <span class="s">&#39;is_ance&#39;</span><span class="p">,</span> <span class="s">&#39;ancestor_name&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ancestor_name</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="c">#validate_rapp_field(self.dat)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; - &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Rapp.get_name"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.get_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          :returns: rapp name</span>
+<span class="sd">          :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</div>
+<div class="viewcode-block" id="Rapp.set_ancestor"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.set_ancestor">[docs]</a>    <span class="k">def</span> <span class="nf">set_ancestor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ancestor_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          :param ancestor_name: its rapps ancestor name</span>
+<span class="sd">          :type ancestor_name: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ancestor_name</span> <span class="o">=</span> <span class="n">ancestor_name</span>
+</div>
+<div class="viewcode-block" id="Rapp.get_ancestor"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.get_ancestor">[docs]</a>    <span class="k">def</span> <span class="nf">get_ancestor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          :returns: its ancestor&#39;s name set by indexer</span>
+<span class="sd">          :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ancestor_name</span>
+</div>
+<div class="viewcode-block" id="Rapp.is_compatible"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.is_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          it compares its compatibility with given uri. and returns true if it is compatible.</span>
+<span class="sd">          If it is virtual rapp which does not have compatibility field, return True always</span>
+
+<span class="sd">          :param uri: rocon_uri </span>
+<span class="sd">          :type uri: rocon_uri.RoconURI</span>
+
+<span class="sd">          :returns: true if compatible </span>
+<span class="sd">          :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">my_uri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;compatibility&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s">&#39;compatibility&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">my_uri</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">rocon_uri</span><span class="o">.</span><span class="n">is_compatible</span><span class="p">(</span><span class="n">my_uri</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="Rapp.get_parent"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.get_parent">[docs]</a>    <span class="k">def</span> <span class="nf">get_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          :returns: parent rapp name</span>
+<span class="sd">          :rtype: str </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;parent_name&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s">&#39;parent_name&#39;</span> <span class="ow">in</span>  <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="Rapp.classify"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          classifies itself. It sets the following member variables.</span>
+
+<span class="sd">          is_impl : Is it implementation?</span>
+<span class="sd">          is_ance : Is it Ancestor?</span>
+<span class="sd">          type    : str(Virtual Ancestor, Implementation Ancestor or Implementation Child)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_impl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">classify_rapp_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Rapp.load_from_file"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.load_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          loads rapp data from file. and classifies itself.</span>
+
+<span class="sd">          :param filename: absolute path to rapp definition</span>
+<span class="sd">          :type filename: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">load_yaml_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Rapp.inherit"><a class="viewcode-back" href="../../rapp_api.html#rocon_app_utilities.rapp.Rapp.inherit">[docs]</a>    <span class="k">def</span> <span class="nf">inherit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          Inherits missing information from the given rapp</span>
+
+<span class="sd">          :param rapp: rapp to inherit</span>
+<span class="sd">          :type rapp: rocon_app_utilities.Rapp</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">INHERITABLE_ATTRIBUTES</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;display&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;icon&#39;</span><span class="p">,</span> <span class="s">&#39;public_interface&#39;</span><span class="p">,</span> <span class="s">&#39;public_parameters&#39;</span><span class="p">,</span> <span class="s">&#39;parent_name&#39;</span><span class="p">]</span>
+
+        <span class="c"># Once it inherits, it removes parent_specification field. If it is inherits from another child, it obtains parent_specification anyway</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;parent_name&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">INHERITABLE_ATTRIBUTES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">rapp</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">rapp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">()</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">is_implementation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_impl</span>
+
+
+    <span class="k">def</span> <span class="nf">is_ancestor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ance</span>
+
+</div>
+<span class="k">class</span> <span class="nc">RappValidation</span><span class="p">(</span><span class="n">Rapp</span><span class="p">):</span>
+    <span class="n">_required</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_optional</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_not_allowed</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Rapp Validation. If it has all requirements and does not include any not_allowed attributes, it is valid rapp</span>
+<span class="sd">            </span>
+<span class="sd">            :param data: rapp specification </span>
+<span class="sd">            :type data: dict</span>
+
+<span class="sd">            :returns: whether it is valid spec </span>
+<span class="sd">            :rtype: bool</span>
+
+<span class="sd">            :raises: InvalidRappFieldException: It includes not allowed field or misses required field</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">missing_required</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_difference</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_required</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> 
+        <span class="n">included_not_allowed</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_intersection</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_not_allowed</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_required</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">included_not_allowed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidRappFieldException</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">missing_required</span><span class="p">,</span> <span class="n">included_not_allowed</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_intersection</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_difference</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">VirtualAncestorRapp</span><span class="p">(</span><span class="n">RappValidation</span><span class="p">):</span>
+    <span class="n">_required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;display&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">]</span>
+    <span class="n">_optional</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;icon&#39;</span><span class="p">,</span> <span class="s">&#39;public_interface&#39;</span><span class="p">,</span> <span class="s">&#39;public_parameters&#39;</span><span class="p">]</span>
+    <span class="n">_not_allowed</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;compatibility&#39;</span><span class="p">,</span> <span class="s">&#39;launch&#39;</span><span class="p">,</span> <span class="s">&#39;parent_name&#39;</span><span class="p">,</span> <span class="s">&#39;pairing_clients&#39;</span><span class="p">,</span> <span class="s">&#39;required_capability&#39;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">ImplementationAncestorRapp</span><span class="p">(</span><span class="n">RappValidation</span><span class="p">):</span>
+    <span class="n">_required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;display&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;compatibility&#39;</span><span class="p">,</span> <span class="s">&#39;launch&#39;</span><span class="p">]</span>
+    <span class="n">_optional</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;icon&#39;</span><span class="p">,</span> <span class="s">&#39;pairing_clients&#39;</span><span class="p">,</span> <span class="s">&#39;required_capability&#39;</span><span class="p">,</span> <span class="s">&#39;public_interface&#39;</span><span class="p">,</span> <span class="s">&#39;public_parameters&#39;</span><span class="p">]</span>
+    <span class="n">_not_allowed</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;parent_name&#39;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">ImplementationChildRapp</span><span class="p">(</span><span class="n">RappValidation</span><span class="p">):</span>
+    <span class="n">_required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;compatibility&#39;</span><span class="p">,</span> <span class="s">&#39;launch&#39;</span><span class="p">,</span> <span class="s">&#39;parent_name&#39;</span><span class="p">]</span>
+    <span class="n">_optional</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;icon&#39;</span><span class="p">,</span> <span class="s">&#39;pairing_clients&#39;</span><span class="p">,</span> <span class="s">&#39;required_capability&#39;</span><span class="p">]</span>
+    <span class="n">_not_allowed</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;public_interface&#39;</span><span class="p">,</span> <span class="s">&#39;public_parameters&#39;</span><span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../rocon_app_utilities.html" >rocon_app_utilities</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jihoon Lee.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

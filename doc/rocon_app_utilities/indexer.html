@@ -1,0 +1,195 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Rapp Indexer &mdash; rocon_app_utilities 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rocon_app_utilities 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="Indexer Test Cases" href="test_cases.html" />
+    <link rel="prev" title="Rapp Validataion Test Cases" href="rapp_validation_test.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="test_cases.html" title="Indexer Test Cases"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rapp_validation_test.html" title="Rapp Validataion Test Cases"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rapp-indexer">
+<h1>Rapp Indexer<a class="headerlink" href="#rapp-indexer" title="Permalink to this headline">¶</a></h1>
+<p>Rapp Indexer provides follwing APIs</p>
+<dl class="class">
+<dt id="rocon_app_utilities.RappIndexer">
+<em class="property">class </em><tt class="descclassname">rocon_app_utilities.</tt><tt class="descname">RappIndexer</tt><big>(</big><em>raw_data=None</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rocon_app_utilities.RappIndexer.get_compatible_rapps">
+<tt class="descname">get_compatible_rapps</tt><big>(</big><em>uri=&lt;rocon_uri.uri.RoconURI object at 0x40a3390&gt;</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.get_compatible_rapps" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all rapps which are compatible with given URI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> (<em>str or rocon_uri.RoconURI</em>) &#8211; Rocon URI</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of compatible rapps</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">[rocon_app_utilities.Rapp]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">RappAncestorconflictException: an exception when more than one implementation of an ancestor are found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rocon_app_utilities.RappIndexer.get_rapp">
+<tt class="descname">get_rapp</tt><big>(</big><em>rapp_name</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.get_rapp" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns complete rapp instance which includes inherited attributes from its parent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>rapp</em>) &#8211; Rapp name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rapp instance</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">rocon_app_utilities.rapp.Rapp</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">RappNotExistException: the given rapp name does not exist</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rocon_app_utilities.RappIndexer.get_raw_rapp">
+<tt class="descname">get_raw_rapp</tt><big>(</big><em>rapp_name</em><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.get_raw_rapp" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns rapp instance of given name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rapp_name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; rapp name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rapp</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">rocon_app_utilities.Rapp</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">RappNotExistException: the given rapp name does not exist</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rocon_app_utilities.RappIndexer.to_dot">
+<tt class="descname">to_dot</tt><big>(</big><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.to_dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the dot graph format</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rocon_app_utilities.RappIndexer.update_index">
+<tt class="descname">update_index</tt><big>(</big><big>)</big><a class="headerlink" href="#rocon_app_utilities.RappIndexer.update_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crawls rocon apps from ROS_PACKAGE_PATH and generates raw_data dictionary</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rapp_validation_test.html"
+                        title="previous chapter">Rapp Validataion Test Cases</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="test_cases.html"
+                        title="next chapter">Indexer Test Cases</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/indexer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="test_cases.html" title="Indexer Test Cases"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rapp_validation_test.html" title="Rapp Validataion Test Cases"
+             >previous</a> |</li>
+        <li><a href="index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jihoon Lee.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

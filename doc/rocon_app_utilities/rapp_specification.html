@@ -1,0 +1,274 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Rapp Specification &mdash; rocon_app_utilities 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rocon_app_utilities 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="Rapp API" href="rapp_api.html" />
+    <link rel="prev" title="Overview" href="README.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rapp_api.html" title="Rapp API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="README.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rapp-specification">
+<h1>Rapp Specification<a class="headerlink" href="#rapp-specification" title="Permalink to this headline">¶</a></h1>
+<p>Rapp infers <cite>rocon_app</cite> or <cite>robot_app</cite> used in <a class="reference external" href="http://www.robotconcert.org">Robotics in Concert</a></p>
+<div class="section" id="rapp-types">
+<h2>Rapp Types<a class="headerlink" href="#rapp-types" title="Permalink to this headline">¶</a></h2>
+<p>The following table describes the characteristics of each rapp types and requirements</p>
+<ul class="simple">
+<li>R = required</li>
+<li>O = optional</li>
+<li>N = not Allowed</li>
+<li>i = inherited from nearest parent if not present</li>
+</ul>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="26%" />
+<col width="26%" />
+<col width="26%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Field</th>
+<th class="head">Virtual Rapp</th>
+<th class="head" colspan="2">Implementation Rapp</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>&nbsp;</td>
+<td>Ancestor</td>
+<td>Ancestor</td>
+<td>Child</td>
+</tr>
+<tr class="row-odd"><td>display</td>
+<td>R</td>
+<td>R</td>
+<td>O <sup>i</sup></td>
+</tr>
+<tr class="row-even"><td>description</td>
+<td>R</td>
+<td>R</td>
+<td>O <sup>i</sup></td>
+</tr>
+<tr class="row-odd"><td>icon</td>
+<td>O</td>
+<td>O</td>
+<td>O <sup>i</sup></td>
+</tr>
+<tr class="row-even"><td>public_interface</td>
+<td>O</td>
+<td>O</td>
+<td>N <sup>i</sup></td>
+</tr>
+<tr class="row-odd"><td>public_parameters</td>
+<td>O</td>
+<td>O</td>
+<td>N <sup>i</sup></td>
+</tr>
+<tr class="row-even"><td>compatibility</td>
+<td>N</td>
+<td>R</td>
+<td>R</td>
+</tr>
+<tr class="row-odd"><td>launch</td>
+<td>N</td>
+<td>R</td>
+<td>R</td>
+</tr>
+<tr class="row-even"><td>parent_name</td>
+<td>N</td>
+<td>N</td>
+<td>R</td>
+</tr>
+<tr class="row-odd"><td>pairing_clients</td>
+<td>N</td>
+<td>O</td>
+<td>O</td>
+</tr>
+<tr class="row-even"><td>required_capability</td>
+<td>N</td>
+<td>O</td>
+<td>O</td>
+</tr>
+</tbody>
+</table>
+<p>Thre are two kinds of classifications.</p>
+<div class="section" id="virutal-rapp-vs-rapp-implementaion">
+<h3>Virutal Rapp vs Rapp Implementaion<a class="headerlink" href="#virutal-rapp-vs-rapp-implementaion" title="Permalink to this headline">¶</a></h3>
+<p>If the following two are present, it is a rapp implementation. Otherwise it is a virtual rapp.</p>
+<ul class="simple">
+<li>compatibility : Rocon URI</li>
+<li>launch - &lt;package_name&gt;/&lt;/.launch&gt;</li>
+</ul>
+<p>If it is a rapp impementation, the following three parameters are optional</p>
+<ul class="simple">
+<li>icon</li>
+<li>capabilities</li>
+<li>pairing_clients : pairing application with this rapp. e.g) <a class="reference external" href="https://github.com/robotics-in-concert/rocon_app_platform/blob/hydro-devel/rocon_apps/apps/talker/talker.rapp">talker.rapp</a></li>
+</ul>
+<p>Note: Rapp implementations may be rapps at the top of a rapp chain.</p>
+</div>
+<div class="section" id="child-rapps-vs-ancestor-rapp">
+<h3>Child Rapps Vs Ancestor Rapp<a class="headerlink" href="#child-rapps-vs-ancestor-rapp" title="Permalink to this headline">¶</a></h3>
+<p>If the following is present, it is a child rapp. Otherwise it is an ancestor rapp.</p>
+<ul class="simple">
+<li>parent_name : &lt;package_name&gt;/&lt;rapp name&gt;</li>
+</ul>
+<p>Note:</p>
+<ul class="simple">
+<li>parent_name and public_interface are mutually exclusive.</li>
+<li>Child rapps must be rapp implementations</li>
+<li>Ancestor rapps can be either virtual or implementation rapps</li>
+</ul>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p><em>Chirp Virtual Ancestor Rapp</em></p>
+<div class="highlight-yaml"><div class="highlight"><pre><span class="c1"># rocon_apps/chirp</span>
+<span class="l-Scalar-Plain">display</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Chirp</span>
+<span class="l-Scalar-Plain">description</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Make an audible &quot;chirp&quot; sound.</span>
+<span class="l-Scalar-Plain">icon</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">rocon_apps/chirp_bubble_icon.png</span>
+<span class="l-Scalar-Plain">public_interface</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">rocon_apps/chirp.interface</span>
+<span class="l-Scalar-Plain">public_parameters</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">rocon_apps/chirp.parameters</span>
+</pre></div>
+</div>
+<p><em>Chirp Child Implementation Rapp</em></p>
+<div class="highlight-yaml"><div class="highlight"><pre><span class="c1"># turtlebot_apps/chirp</span>
+<span class="l-Scalar-Plain">description</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Make a &quot;moo&quot; sound.</span>
+<span class="l-Scalar-Plain">launch</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">turtlebot_apps/chirp.launch</span>
+<span class="l-Scalar-Plain">compatibility</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">rocon:/turtlebot</span>
+<span class="l-Scalar-Plain">parent_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">rocon_apps/chirp</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="export">
+<h2>Export<a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h2>
+<p>Rapp is exported via package.xml. Indexer searches for <cite>rocon_app</cite> in export tag to collect all available rapps.</p>
+<div class="highlight-xml"><div class="highlight"><pre>...
+<span class="nt">&lt;export&gt;</span>
+  <span class="nt">&lt;rocon_app&gt;</span>RELATIVE_PATH_IN_PACKAGE<span class="nt">&lt;/rocon_app&gt;</span>
+  <span class="c">&lt;!--&lt;rocon_app&gt;apps/chirp/chirp.rapp&lt;/rocon_app&gt;--&gt;</span>
+<span class="nt">&lt;/export&gt;</span>
+...
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Rapp Specification</a><ul>
+<li><a class="reference internal" href="#rapp-types">Rapp Types</a><ul>
+<li><a class="reference internal" href="#virutal-rapp-vs-rapp-implementaion">Virutal Rapp vs Rapp Implementaion</a></li>
+<li><a class="reference internal" href="#child-rapps-vs-ancestor-rapp">Child Rapps Vs Ancestor Rapp</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#export">Export</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="README.html"
+                        title="previous chapter">Overview</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rapp_api.html"
+                        title="next chapter">Rapp API</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/rapp_specification.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rapp_api.html" title="Rapp API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="README.html" title="Overview"
+             >previous</a> |</li>
+        <li><a href="index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jihoon Lee.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

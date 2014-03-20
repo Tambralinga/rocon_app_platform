@@ -1,0 +1,285 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rocon_app_utilities.indexer &mdash; rocon_app_utilities 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="rocon_app_utilities 0.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for rocon_app_utilities.indexer</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c">#</span>
+<span class="c"># License: BSD</span>
+<span class="c">#   https://raw.github.com/robotics-in-concert/rocon_app_platform/license/LICENSE</span>
+<span class="c">#</span>
+<span class="c">#################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span> 
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="c">#from .rapp import Rapp, MetaRapp</span>
+<span class="kn">import</span> <span class="nn">rocon_python_utils</span>
+<span class="kn">import</span> <span class="nn">rocon_uri</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.rapp</span> <span class="kn">import</span> <span class="n">Rapp</span>
+<span class="kn">from</span> <span class="nn">rocon_console</span> <span class="kn">import</span> <span class="n">console</span>
+
+<div class="viewcode-block" id="RappIndexer"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer">[docs]</a><span class="k">class</span> <span class="nc">RappIndexer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;raw_data_path&#39;</span><span class="p">,</span> <span class="s">&#39;raw_data&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_data_path</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># TODO : We might want to manipulate raw_data to have better format in the future. e.g) cache creation</span>
+        <span class="c"># self.data = {} </span>
+
+        <span class="k">if</span> <span class="n">raw_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">raw_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_index</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="RappIndexer.update_index"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.update_index">[docs]</a>    <span class="k">def</span> <span class="nf">update_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          Crawls rocon apps from ROS_PACKAGE_PATH and generates raw_data dictionary</span>
+
+<span class="sd">          :raises: InvalidRappFieldException:</span>
+<span class="sd">          :raises: InvalidRappException:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_data_path</span><span class="p">,</span> <span class="n">_invalid_path</span> <span class="o">=</span> <span class="n">rocon_python_utils</span><span class="o">.</span><span class="n">ros</span><span class="o">.</span><span class="n">resource_index_from_package_exports</span><span class="p">(</span><span class="s">&#39;rocon_app&#39;</span><span class="p">)</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">console</span><span class="o">.</span><span class="n">pretty_println</span><span class="p">(</span><span class="s">&#39;Crawling ROS_PACKAGE_PATH...&#39;</span><span class="p">,</span><span class="n">console</span><span class="o">.</span><span class="n">bold</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data_path</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">Rapp</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">classify</span><span class="p">()</span>
+                <span class="n">raw_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+                <span class="n">console</span><span class="o">.</span><span class="n">pretty_println</span><span class="p">(</span><span class="s">&#39;  [&#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;] : &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; has been added&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">InvalidRappFieldException</span> <span class="k">as</span> <span class="n">irfe</span><span class="p">:</span>
+                <span class="n">console</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;  [&#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;] has not been added : &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">irfe</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">InvalidRappException</span> <span class="k">as</span> <span class="n">ire</span><span class="p">:</span>
+                <span class="n">console</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;  [&#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;] has not been added : &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ire</span><span class="p">))</span>
+
+        <span class="n">console</span><span class="o">.</span><span class="n">pretty_println</span><span class="p">(</span><span class="s">&#39;Available Rapps&#39;</span><span class="p">,</span><span class="n">console</span><span class="o">.</span><span class="n">bold</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">rapp</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rapp</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="RappIndexer.get_nearest_parent"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.get_nearest_parent">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          returns the nearest parent instance of the given rapp</span>
+
+<span class="sd">          :param rapp_name: rapp name</span>
+<span class="sd">          :type rapp_name: str</span>
+
+<span class="sd">          :returns: parent rapp name if it does not have it return None</span>
+<span class="sd">          :rtype: str</span>
+
+<span class="sd">          :raises: RappNotExistException: the given rapp name does not exist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rapp_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RappNotExistException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rapp_name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; does not exist&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="n">rapp_name</span><span class="p">]</span><span class="o">.</span><span class="n">get_parent</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="RappIndexer.get_ancestor"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.get_ancestor">[docs]</a>    <span class="k">def</span> <span class="nf">get_ancestor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          Returns ancestor of given rapp name</span>
+
+<span class="sd">          :param rapp_name: rapp name</span>
+<span class="sd">          :type rapp_name: str</span>
+
+<span class="sd">          :returns: the acestor rapp name of given rapp</span>
+<span class="sd">          :rtype: str</span>
+
+<span class="sd">          :raises: RappNotExistException: the given rapp name does not exist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rapp_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RappNotExistException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rapp_name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; does not exist&#39;</span><span class="p">)</span>
+
+        <span class="n">current_rapp</span> <span class="o">=</span> <span class="n">rapp_name</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="n">current_rapp</span><span class="p">]</span><span class="o">.</span><span class="n">is_ancestor</span><span class="p">():</span>
+            <span class="n">current_rapp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="n">current_rapp</span><span class="p">]</span><span class="o">.</span><span class="n">get_parent</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">current_rapp</span>
+</div>
+<div class="viewcode-block" id="RappIndexer.get_rapp"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.get_rapp">[docs]</a>    <span class="k">def</span> <span class="nf">get_rapp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          returns rapp instance of given name</span>
+
+<span class="sd">          :param rapp_name: rapp name</span>
+<span class="sd">          :type rapp_name: str</span>
+
+<span class="sd">          :returns: rapp</span>
+<span class="sd">          :rype: rocon_app_utilities.Rapp</span>
+
+<span class="sd">          :raises: RappNotExistException: the given rapp name does not exist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rapp_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RappNotExistException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rapp_name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; does not exist&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="n">rapp_name</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RappIndexer.get_complete_rapp"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.get_complete_rapp">[docs]</a>    <span class="k">def</span> <span class="nf">get_complete_rapp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          returns complete rapp instance which includes inherited attributes from its parent</span>
+
+<span class="sd">          :param rapp name: Rapp name</span>
+<span class="sd">          :type rapp_name: str</span>
+
+<span class="sd">          :returns: rapp instance</span>
+<span class="sd">          :rtype: rocon_app_utilities.rapp.Rapp</span>
+
+<span class="sd">          :raises: RappNotExistException: the given rapp name does not exist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rapp_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RappNotExistException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rapp_name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; does not exist&#39;</span><span class="p">)</span>
+
+        <span class="n">rapp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">(</span><span class="n">rapp_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rapp</span>
+</div>
+<div class="viewcode-block" id="RappIndexer.get_compatible_rapps"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.get_compatible_rapps">[docs]</a>    <span class="k">def</span> <span class="nf">get_compatible_rapps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rocon_uri</span><span class="o">=</span><span class="n">rocon_uri</span><span class="o">.</span><span class="n">RoconURI</span><span class="p">,</span> <span class="n">implementation_only</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span> 
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          returns all rapps which are compatible with given URI </span>
+
+<span class="sd">          # TODO: add capability check later</span>
+
+<span class="sd">          :param rocon uri: Rocon URI</span>
+<span class="sd">          :type rocon_uri: rocon_uri.RoconURI</span>
+<span class="sd">          :param implementation_only: filters only implementation rapps</span>
+<span class="sd">          :type implementation_only:</span>
+
+<span class="sd">          :returns: a list of compatible rapps</span>
+<span class="sd">          :rtype: [rocon_app_utilities.Rapp]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># TODO</span>
+        <span class="k">pass</span>
+</div>
+    <span class="k">def</span> <span class="nf">_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">          resolve the rapp instance with its parent specification and return a runnable rapp</span>
+
+<span class="sd">          :param rapp name: Rapp name</span>
+<span class="sd">          :type rapp_name: str</span>
+
+<span class="sd">          :returns: fully resolved rapp  </span>
+<span class="sd">          :rtype: rocon_utilities.Rapp</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rapp</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="n">rapp_name</span><span class="p">])</span> <span class="c"># Not to currupt original data</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">rapp</span><span class="o">.</span><span class="n">get_parent</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_recursive</span><span class="p">(</span><span class="n">rapp</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_resolve_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rapp</span><span class="p">,</span> <span class="n">parent_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Internal method of _resolve</span>
+
+<span class="sd">            :raises: RappInvalidChainException: Rapp is implmentation child but does not have parent</span>
+
+<span class="sd">            :raises: ParentRappNotFoundException: Its parent does not exist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">rapp</span><span class="o">.</span><span class="n">is_ancestor</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">rapp</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RappInvalidChainException</span><span class="p">(</span><span class="s">&#39;Invalid Rapp Chain from [&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rapp</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;]&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ParentRappNotFoundException</span><span class="p">(</span><span class="n">parent_name</span><span class="p">)</span>
+
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="n">parent_name</span><span class="p">]</span>
+        <span class="n">rapp</span><span class="o">.</span><span class="n">inherit</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_recursive</span><span class="p">(</span><span class="n">rapp</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">get_parent</span><span class="p">())</span>
+
+<div class="viewcode-block" id="RappIndexer.to_dot"><a class="viewcode-back" href="../../indexer.html#rocon_app_utilities.indexer.RappIndexer.to_dot">[docs]</a>    <span class="k">def</span> <span class="nf">to_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            returns the dot graph format</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># TODO</span>
+        <span class="k">pass</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../../index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jihoon Lee.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

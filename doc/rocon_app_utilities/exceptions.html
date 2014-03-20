@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Exceptions &mdash; rocon_app_utilities 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rocon_app_utilities 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="Changelog for package rocon_app_utilities" href="CHANGELOG.html" />
+    <link rel="prev" title="Rapp Indexer APIs" href="indexer_api.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="CHANGELOG.html" title="Changelog for package rocon_app_utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="indexer_api.html" title="Rapp Indexer APIs"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-rocon_app_utilities.exceptions">
+<span id="exceptions"></span><h1>Exceptions<a class="headerlink" href="#module-rocon_app_utilities.exceptions" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.InvalidRappException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">InvalidRappException</tt><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#InvalidRappException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.InvalidRappException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalid format of rapp</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.InvalidRappFieldException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">InvalidRappFieldException</tt><big>(</big><em>cls</em>, <em>invalid_required</em>, <em>invalid_not_allowed</em><big>)</big><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#InvalidRappFieldException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.InvalidRappFieldException" title="Permalink to this definition">¶</a></dt>
+<dd><p>It does not satisfy required or not allowed field</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.ParentRappNotFoundException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">ParentRappNotFoundException</tt><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#ParentRappNotFoundException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.ParentRappNotFoundException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent Not Found Exception</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.RappAncestorConflictException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">RappAncestorConflictException</tt><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#RappAncestorConflictException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.RappAncestorConflictException" title="Permalink to this definition">¶</a></dt>
+<dd><p>If indexer found two implementation with the same ancestor</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.RappCyclicChainException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">RappCyclicChainException</tt><big>(</big><em>stack</em><big>)</big><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#RappCyclicChainException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.RappCyclicChainException" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the rapp includes cyclic chain. e.g child -&gt; parent -&gt; child -&gt; ....</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.RappException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">RappException</tt><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#RappException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.RappException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rapp Exception</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.RappInvalidChainException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">RappInvalidChainException</tt><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#RappInvalidChainException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.RappInvalidChainException" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the rapp chain is invalid.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rocon_app_utilities.exceptions.RappNotExistException">
+<em class="property">exception </em><tt class="descclassname">rocon_app_utilities.exceptions.</tt><tt class="descname">RappNotExistException</tt><a class="reference internal" href="_modules/rocon_app_utilities/exceptions.html#RappNotExistException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rocon_app_utilities.exceptions.RappNotExistException" title="Permalink to this definition">¶</a></dt>
+<dd><p>When Rapp does not exist</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="indexer_api.html"
+                        title="previous chapter">Rapp Indexer APIs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="CHANGELOG.html"
+                        title="next chapter">Changelog for package rocon_app_utilities</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/exceptions.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="CHANGELOG.html" title="Changelog for package rocon_app_utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="indexer_api.html" title="Rapp Indexer APIs"
+             >previous</a> |</li>
+        <li><a href="index.html">rocon_app_utilities 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jihoon Lee.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
