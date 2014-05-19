@@ -7,10 +7,14 @@
 
 from __future__ import division, print_function
 
-import sys
-import os
-import traceback
 import argparse
+import os
+import subprocess
+import sys
+import traceback
+import yaml
+
+import rospkg
 
 from .dependencies import DependencyChecker
 from .rapp_repositories import build_index, get_combined_index, get_index, get_index_dest_prefix_for_base_paths, is_index, load_uris, sanitize_uri, save_uris, uri2url
@@ -20,11 +24,75 @@ from .rapp_repositories import build_index, get_combined_index, get_index, get_i
 #################################################################################
 
 NAME = 'rocon_app'
+RAPP_DEPS_CACHE_FILE = os.path.join(rospkg.get_ros_home(), 'rocon', 'rapp', 'rapp_deps_cache.yaml')
 
 #################################################################################
 # Local methods
 #################################################################################
 
+def _cache_rapp_deps(new_dep_rapp_dict):
+    """
+        Caches rapp dependencies installed by
+    """
+
+    base_path = os.path.dirname(RAPP_DEPS_CACHE_FILE)
+    if not os.path.exists(base_path):
+        os.makedirs(base_path)
+    if not os.path.isfile(RAPP_DEPS_CACHE_FILE):
+        print("Could not find the specified install cache file [%s]" % RAPP_DEPS_CACHE_FILE)
+        with open(os.path.abspath(RAPP_DEPS_CACHE_FILE), 'w') as f:
+            empty_dic = {}
+            yaml.dump(empty_dic, f)
+            f.close()
+
+    with open(os.path.abspath(RAPP_DEPS_CACHE_FILE), 'r') as f:
+        rapp_deps_cache = yaml.load(f)
+
+    if rapp_deps_cache:
+        print("\nInstalled rapp dependency cache")
+        for cache_dep, cache_rapps in rapp_deps_cache.items():
+            print("  %s: %s" % (cache_dep, cache_rapps))
+    else:
+        print("\nInstalled rapp dependency cache is empty.")
+
+    if new_dep_rapp_dict:
+        if rapp_deps_cache:
+            for cache_dep, cache_rapps in rapp_deps_cache.items():
+                for new_rapp, new_deps in new_dep_rapp_dict.items():
+                    for new_dep in new_deps:
+                        if new_dep == cache_dep:
+                            if not new_rapp in cache_rapps:
+                                cache_rapps.append(new_rapp)
+                                print("\nAdding new entries:")
+                                print("  %s: %s" % (cache_dep, new_rapp))
+                        else:
+                            rapp_list.append(new_rapp)
+                            new_dep_rapp[new_dep] = rapp_list
+                            rapp_deps_cache.append(new_dep_rapp)
+                            print("\nAdding new entries:")
+                            print("  %s: %s" % (new_dep, new_rapp))
+        else:
+            rapp_deps_cache = {}
+            for new_rapp, new_deps in new_dep_rapp_dict.items():
+                for new_dep in new_deps:
+                    if new_dep in rapp_deps_cache:
+                        rapp_deps_cache[new_dep].append(new_rapp)
+                    else:
+                        rapp_list = []
+                        rapp_list.append(new_rapp)
+                        new_dep_rapp = {}
+                        rapp_deps_cache[new_dep] = rapp_list
+                    print("  %s: %s" % (new_dep, rapp_deps_cache[new_dep]))
+    else:
+        print("No new rapp dependencies provided.")
+
+    print("\nUpdated Install Cache")
+    for cache_dep, cache_rapps in rapp_deps_cache.items():
+        print("  %s: %s" % (cache_dep, cache_rapps))
+
+    print("\nDumping the Install cache to '%s'" % RAPP_DEPS_CACHE_FILE)
+    with open(os.path.abspath(RAPP_DEPS_CACHE_FILE), 'w') as f:
+        yaml.dump(rapp_deps_cache, f)
 
 def _rapp_cmd_list(argv):
     """
@@ -45,12 +113,35 @@ def _rapp_cmd_list(argv):
 
     compatible_rapps, incompatible_rapps, invalid_rapps = index.get_compatible_rapps(ancestor_share_check=False)
 
-    print('== Available Rapp List == ')
-    for n in compatible_rapps.values():
-        print('  Resource: %s'%(str(n.resource_name)))
-        print('     - Compatibility : %s '%str(n.data['compatibility']))
-        print('     - Ancestor      : %s '%str(n.ancestor_name))
+    dependency_checker = DependencyChecker(index)
+    rapp_deps = dependency_checker.check_rapp_dependencies(compatible_rapps)
 
+    runnable_rapps = {}
+    installable_rapps = {}
+    noninstallable_rapps = {}
+    for rapp in rapp_deps:
+        if rapp_deps[rapp].all_installed():
+            runnable_rapps[rapp] = compatible_rapps[rapp]
+        elif rapp_deps[rapp].any_not_installable():
+            noninstallable_rapps[rapp] = compatible_rapps[rapp]
+        else:
+            installable_rapps[rapp] = compatible_rapps[rapp]
+
+    print('== Installed Rapp List == ')
+    for n in runnable_rapps.values():
+        print('  Resource: %s' % (str(n.resource_name)))
+        print('     - Compatibility : %s ' % str(n.data['compatibility']))
+        print('     - Ancestor      : %s ' % str(n.ancestor_name))
+
+    if len(installable_rapps) > 0:
+        print('== Installable Rapp List == ')
+        for k, v in installable_rapps.items():
+            print('  ' + k + ' : ' + str(v))
+
+    if len(noninstallable_rapps) > 0:
+        print('== Noninstallable Rapp List == ')
+        for k, v in noninstallable_rapps.items():
+            print('  ' + k + ' : ' + str(v))
 
     if len(invalid_rapps) > 0:
         print('== Invalid Rapp List == ')
@@ -72,9 +163,9 @@ def _rapp_cmd_raw_info(argv):
 
     rapp = index.get_raw_rapp(resource_name)
 
-    print('== %s =='%str(rapp))
+    print('== %s ==' % str(rapp))
     for k, v in rapp.raw_data.items():
-        print('  %s : %s'%(str(k),str(v)))
+        print('  %s : %s' % (str(k), str(v)))
 
 def _rapp_cmd_info(argv):
     print("Displays rapp resolved information")
@@ -89,13 +180,13 @@ def _rapp_cmd_info(argv):
     index = get_combined_index()
     try:
         rapp = index.get_rapp(resource_name)
-        print('== %s =='%str(rapp))
+        print('== %s ==' % str(rapp))
         for k, v in rapp.raw_data.items():
-            print('  %s : %s'%(str(k),str(v)))
+            print('  %s : %s' % (str(k), str(v)))
     except Exception as e:
-        print('%s : Error - %s'%(resource_name,str(e)))
+        print('%s : Error - %s' % (resource_name, str(e)))
 
-        
+
 #def _rapp_cmd_depends(argv):
 #    print("Dependecies")
 #    pass
@@ -125,15 +216,15 @@ def _rapp_cmd_compat(argv):
 
     print('== Available Rapp List for [%s] == ' % compatibility)
     for r in compatible_rapps.values():
-        print('  Resource: %s'%(str(r.resource_name)))
-        print('     - Ancestor : %s '%str(r.ancestor_name))
+        print('  Resource: %s' % (str(r.resource_name)))
+        print('     - Ancestor : %s ' % str(r.ancestor_name))
 
     print('== Incompatible Rapp List for [%s] == ' % compatibility)
-    for k, v in incompatible_rapps.items(): 
+    for k, v in incompatible_rapps.items():
         print('  ' + k + ' : ' + str(v.raw_data['compatibility']))
 
     print('== Invalid Rapp List for [%s] == ' % compatibility)
-    for k, v in invalid_rapps.items(): 
+    for k, v in invalid_rapps.items():
         print('  ' + k + ' : ' + str(v))
 
 
@@ -152,10 +243,11 @@ def _rapp_cmd_install(argv):
     dependencyChecker = DependencyChecker(index)
 
     dependencies = dependencyChecker.check_rapp_dependencies(rapp_names)
-
     missing_dependencies = []
+    rapp_deps_list = {}
     for rapp_name, deps in dependencies.items():
         missing_dependencies.extend(deps.noninstallable)
+        rapp_deps_list[rapp_name] = deps.installable
     missing_dependencies = set(missing_dependencies)
 
     noninstallable_rapps = [rapp_name for rapp_name, deps in dependencies.items() if deps.noninstallable]
@@ -164,12 +256,54 @@ def _rapp_cmd_install(argv):
                                                                                                  ' '.join(missing_dependencies)
                                                                                                 ))
     else:
+        # cache rapps' dependencies
+        _cache_rapp_deps(rapp_deps_list)
         # resolve deps and install them
         print("Installing dependencies for: %s" % (' '.join(sorted(rapp_names))))
         if parsed_args.debug:
-            print("- installing the following packages: %s" % (' '.join(sorted(set([d for deps in dependencies.values() for d in deps.installable])))))
-            print("- already installed packages: %s" % (' '.join(sorted(set([d for deps in dependencies.values() for d in deps.installed])))))
+            print("- installing the following packages: %s" % ' '.join(sorted(set([d for deps in dependencies.values() for d in deps.installable]))))
+            print("- already installed packages: %s" % ' '.join(sorted(set([d for deps in dependencies.values() for d in deps.installed]))))
         dependencyChecker.install_rapp_dependencies(rapp_names)
+
+
+def _rapp_cmd_uninstall(argv):
+    #  Parse command arguments
+    args = argv[2:]
+    parser = argparse.ArgumentParser(description='Uninstall a list of rapps')
+    parser.add_argument('--debug', action='store_true', help='Output debug information')
+    parser.add_argument('rapp_names', type=str, nargs='+', help='Rocon URI')
+    parsed_args = parser.parse_args(args)
+    rapp_names = set(parsed_args.rapp_names)
+
+    if not os.path.isfile(RAPP_DEPS_CACHE_FILE):
+        print("Could not find the cache file [%s]" % RAPP_DEPS_CACHE_FILE)
+        return
+
+    with open(os.path.abspath(RAPP_DEPS_CACHE_FILE), 'r') as f:
+        rapp_deps_cache = yaml.load(f)
+
+    for rapp_name in rapp_names:
+        print("\nRemoving dependencies for rapp '%s':" % rapp_name)
+        none_removed = True
+        for cache_dep, cache_rapps in rapp_deps_cache.items():
+            if rapp_name in cache_rapps:
+                if len(cache_rapps) == 1:
+                    print("Removing dependency '%s'." % (cache_dep))
+                    sub_command = ["sudo", "apt-get", "remove", "-y", cache_dep]
+                    print("\033[1mexecuting command [%s]\033[0m" % ' '.join(sub_command))
+                    result = subprocess.call(sub_command)
+                    if result != 0:
+                        print('command [%s] failed' % (' '.join(sub_command)))
+                        return
+                    del rapp_deps_cache[cache_dep]
+                    none_remove = False
+                else:
+                    print("Cannot remove dependency '%s', since other rapps depend on it." % (cache_dep))
+        if none_removed:
+            print("No dependencies are installed for rapp '%s' or they are all locked by other rapps.\n" % rapp_name)
+
+    with open(os.path.abspath(RAPP_DEPS_CACHE_FILE), 'w') as f:
+        yaml.dump(rapp_deps_cache, f)
 
 
 def _rapp_cmd_index(argv):
@@ -270,6 +404,7 @@ Commands:
 \trocon_app rawinfo\tdisplay rapp raw information
 \trocon_app compat\tdisplay a list of rapps that are compatible with the given rocon uri
 \trocon_app install\tinstall a list of rapps
+\trocon_app uninstall\tuninstall a list of rapps
 \trocon_app add-repo\tadd a rapp repository
 \trocon_app remove-repo\tremove a rapp repository
 \trocon_app list-repos\tlist the rapp repositories
@@ -316,6 +451,8 @@ def main():
             _rapp_cmd_compat(argv)
         elif command == 'install':
             _rapp_cmd_install(argv)
+        elif command == 'uninstall':
+            _rapp_cmd_uninstall(argv)
         elif command == 'index':
             _rapp_cmd_index(argv)
         elif command == 'add-repo':
