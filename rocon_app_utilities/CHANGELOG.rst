@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.7.6 (2015-01-12)
+------------------
+* remove custom platform checker and use rospkg.os_detect in dependency checker closes `#269 <https://github.com/robotics-in-concert/rocon_app_platform/issues/269>`_
+* Contributors: Jihoon Lee
+
+0.7.5 (2015-01-08)
+------------------
+
+0.7.4 (2014-12-30)
+------------------
+
 0.7.3 (2014-11-21)
 ------------------
 * rename sim to simulation

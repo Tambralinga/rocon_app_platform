@@ -1,6 +1,23 @@
 Changelog
 =========
 
+0.7.6 (2015-01-12)
+------------------
+* add log and typo fix
+* use auto_rapp_installation param to enable disable installer
+* disabl installer logic
+* Contributors: Jihoon Lee
+
+0.7.5 (2015-01-08)
+------------------
+* add rocon_interactions as run_depend closes `#268 <https://github.com/robotics-in-concert/rocon_app_platform/issues/268>`_
+* Contributors: Jihoon Lee
+
+0.7.4 (2014-12-30)
+------------------
+* ignore unncessay remapping rule `#265 <https://github.com/robotics-in-concert/rocon_app_platform/issues/265>`_
+* Contributors: Jihoon Lee
+
 0.7.3 (2014-11-21)
 ------------------
 * Merge pull request `#263 <https://github.com/robotics-in-concert/rocon_app_platform/issues/263>`_ from robotics-in-concert/sim_param

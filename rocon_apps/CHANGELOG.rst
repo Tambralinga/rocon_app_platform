@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.7.6 (2015-01-12)
+------------------
+
+0.7.5 (2015-01-08)
+------------------
+
+0.7.4 (2014-12-30)
+------------------
+* volume is now configurable
+* Contributors: Jihoon Lee
+
 0.7.3 (2014-11-21)
 ------------------
 * migrate teleop implementation rapps to yujin_ocs
