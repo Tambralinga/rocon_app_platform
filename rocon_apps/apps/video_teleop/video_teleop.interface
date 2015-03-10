@@ -1,6 +1,6 @@
 publishers:
-  - name: /teleop/compressed_image
-    type: sensor_msgs/CompressedImage
+  - name: /teleop/image
+    type: sensor_msgs/Image
 subscribers:
   - name: /teleop/cmd_vel
     type: geometry_msgs/Twist
